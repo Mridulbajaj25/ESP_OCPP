@@ -28,15 +28,7 @@ const char* password = "123456789";
 const char* ocppServer = "wss://ocppserver.myekigai.com"; //MAIN ONE
 
 
-// float myVoltagePin=25;
-// float myCurrentPin=35;
-// float readVoltage;
-// float readCurrent;
-// float Voltage;
-// float Current;
-// float Power;
-
-// String inputData = "";
+String inputData = "";
 String idTag = "0123456789ABCD"; // This will be used for OCPP transaction
 unsigned long long  currentTransactionId = 0;
 
@@ -56,11 +48,6 @@ void setup() {
 
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
-  // pinMode(myVoltagePin, INPUT);
-  // pinMode(myCurrentPin, INPUT);
-
-  // analogSetWidth(12);               // 12-bit resolution
-  //analogSetClockDiv(5);             // 80 MHz / 5 = 16 MHz ADC clock
 
   // Connect to WiFi
   WiFi.begin(ssid, password);
@@ -81,8 +68,6 @@ void loop() {
 
 
   mocpp_loop(); // MicroOcpp background tasks
-
-  //setMeterValueSampleInterval(10);
 
 
   if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) {
@@ -107,9 +92,7 @@ void loop() {
     return calculateCurrentVoltage () ; 
   }, 1);
 
-
-
-
+  
 
   if (isValidCard(rfid.uid.uidByte)) {
     Serial.println("Authorized card detected");
@@ -168,26 +151,18 @@ void loop() {
 }
  
 
-  // // Read serial input and send to server if charging
-  // while (Serial.available()) {
-  //   char c = Serial.read();
-  //   if (c == '\n') {
-  //     if (ocppPermitsCharge()) {
-  //       sendSerialDataToServer(inputData);
-  //     }
-  //     inputData = "";
-  //   } else {
-  //     inputData += c;
-  //   }
-  // }
-
-
-  // Optional: Power reading in W
-  // setPowerMeterInput([]() {
-  //   // Replace with real-time power reading
-  //   return 567.89;
-  // }, 1);
-
+  // Read serial input and send to server if charging
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n') {
+      if (ocppPermitsCharge()) {
+        sendSerialDataToServer(inputData);
+      }
+      inputData = "";
+    } else {
+      inputData += c;
+    }
+  }
 
 
 // Validate the scanned UID
@@ -267,23 +242,6 @@ void sendMetervalues() {
 }
 
 
-// float calculateCurrentVoltage (){
-  
-//   readVoltage=analogRead(myVoltagePin);
-//   Voltage = (readVoltage * 1000 ) / 4095;
-
-//   readCurrent=analogRead(myCurrentPin);
-//   Current = (readCurrent * 200 ) / 4095;
-
-//   Power = Voltage * Current ;
-
-//   Serial.println(readVoltage);
-//   Serial.println(readCurrent);
-//  Serial.println(Power);
-
-//   return Power ;
-
-// }
 
 float calculateCurrentVoltage() {
   String buffer = "";
